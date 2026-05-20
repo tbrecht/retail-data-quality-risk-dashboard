@@ -4,7 +4,7 @@ from openpyxl.utils import get_column_letter
 from pathlib import Path
 import re
 
-INPUT_FILE = "retail_store_sales.csv"
+INPUT_FILE = "demo_retail_dataset.csv"
 OUTPUT_FILE = "cleaning_report_output.xlsx"
 SHEET_NAME = None
 

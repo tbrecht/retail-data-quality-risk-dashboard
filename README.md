@@ -2,7 +2,7 @@
 
 End-to-end analytics workflow built in Python for cleaning retail data, documenting data quality issues, generating predictive insights, and presenting results through an interactive Streamlit dashboard.
 
-This project was built as a portfolio demonstration showing how raw business data can be transformed into clean, decision-ready output.
+This project demonstrates how raw business data can be transformed into clean, decision-ready output while preserving transparency and explainability.
 
 ---
 
@@ -57,7 +57,7 @@ The cleaning engine performs:
 - Original dataset preservation
 - Clean dataset generation
 - Duplicate detection
-- Removal of unusable records
+- Removal of unusable rows
 - Missingness reporting
 - Numeric summaries
 - Human-readable text distributions
@@ -65,7 +65,7 @@ The cleaning engine performs:
 - Cell-level issue identification
 - Change logging
 
-Generated outputs include:
+Generated outputs:
 
 - Original_Data
 - Cleaned_Data
@@ -83,9 +83,13 @@ The predictive workflow creates a transparent business risk model.
 The model evaluates:
 
 - Sales momentum
+- Recency-weighted performance
 - Sales volatility
 - Relative sales strength
 - Transaction volume
+- Customer concentration risk
+- Outlier burden
+- Data reliability risk
 
 Outputs include:
 
@@ -95,7 +99,48 @@ Outputs include:
 - Scientific breakdown
 - Full risk model output
 
-### Risk Score Interpretation
+---
+
+## Composite Risk Score (v2)
+
+The model uses a transparent weighted scoring framework.
+
+### Business Trend Risk (25%)
+
+Evaluates:
+
+- Sales momentum
+- Recency weighting
+
+### Operational Risk (20%)
+
+Evaluates:
+
+- Sales volatility
+- Transaction volume
+
+### Customer Risk (15%)
+
+Evaluates:
+
+- Customer concentration
+
+### Performance Risk (20%)
+
+Evaluates:
+
+- Relative sales strength
+
+### Data Reliability Risk (20%)
+
+Evaluates:
+
+- Outlier burden
+- Data support quality
+
+---
+
+## Risk Score Interpretation
 
 The composite risk score ranges from:
 
@@ -103,7 +148,7 @@ The composite risk score ranges from:
 
 100 → Highest relative concern
 
-This is a **relative ranking score**.
+The score is a **relative ranking metric**.
 
 It is **NOT** a probability.
 
@@ -125,6 +170,21 @@ Risk categories:
 - Moderate Risk = 25–49.9
 - High Risk = 50–74.9
 - Critical Risk = 75–100
+
+---
+
+## Model Enhancements
+
+Additional considerations included in the updated model:
+
+- Recency weighting using exponential decay
+- Customer dependency assessment
+- Outlier burden evaluation
+- Data reliability adjustment
+- Expanded scientific documentation
+- Business-friendly interpretation layer
+
+The risk score is intended as an early warning indicator and should not be interpreted as probability.
 
 ---
 
