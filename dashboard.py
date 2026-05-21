@@ -2,9 +2,13 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
+import json
 
-CLEANING_FILE = "cleaning_report_output.xlsx"
-PREDICTIVE_FILE = "predictive_analytics_output.xlsx"
+with open("config.json", "r") as f:
+    CONFIG = json.load(f)
+
+CLEANING_FILE = CONFIG["cleaning_output_file"]
+PREDICTIVE_FILE = CONFIG["predictive_output_file"]
 
 st.set_page_config(
     page_title="Retail Analytics Dashboard",
@@ -24,7 +28,6 @@ change_log = pd.read_excel(CLEANING_FILE, sheet_name="Change_Log")
 missingness = pd.read_excel(CLEANING_FILE, sheet_name="Missingness")
 
 executive_summary = pd.read_excel(PREDICTIVE_FILE, sheet_name="Executive_Summary")
-model_insights = pd.read_excel(PREDICTIVE_FILE, sheet_name="Model_Insights")
 risk_explainer = pd.read_excel(PREDICTIVE_FILE, sheet_name="Risk_Score_Explainer")
 risk_model = pd.read_excel(PREDICTIVE_FILE, sheet_name="Risk_Model_Output")
 
@@ -127,23 +130,25 @@ explanation = (
     f"**{selected_segment}** is classified as **{segment_row['risk_level']} risk** "
     f"with a score of **{segment_row['composite_risk_score']}**. "
     f"This score is based on sales momentum, volatility, total sales strength, "
-    f"and transaction volume."
+    f"transaction volume, customer concentration, and data reliability factors."
 )
 
 st.write(explanation)
 
 risk_components = pd.DataFrame({
     "Component": [
-        "Decline Score",
-        "Volatility Score",
-        "Low Sales Score",
-        "Low Volume Score"
+        "Business Trend Risk",
+        "Operational Risk",
+        "Customer Risk",
+        "Performance Risk",
+        "Data Reliability Risk"
     ],
     "Score": [
-        segment_row["decline_score"],
-        segment_row["volatility_score"],
-        segment_row["low_sales_score"],
-        segment_row["low_volume_score"]
+        segment_row["business_trend_risk"],
+        segment_row["operational_risk"],
+        segment_row["customer_risk"],
+        segment_row["performance_risk"],
+        segment_row["data_reliability_risk"]
     ]
 })
 
@@ -216,12 +221,13 @@ st.subheader("Recommended Next Actions")
 if segment_row["risk_level"] in ["Critical", "High"]:
     st.warning(
         f"{selected_segment} should be reviewed soon. Focus on recent performance trends, "
-        f"sales volatility, and whether low transaction volume is driving the risk score."
+        f"sales volatility, customer dependency, outlier exposure, and whether low transaction volume "
+        f"is contributing to the risk score."
     )
 elif segment_row["risk_level"] == "Moderate":
     st.info(
         f"{selected_segment} does not appear urgent, but it should be monitored. "
-        f"Look for early signs of weakening sales momentum or increasing volatility."
+        f"Look for early signs of weakening sales momentum, increasing volatility, or rising customer concentration."
     )
 else:
     st.success(

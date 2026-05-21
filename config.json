@@ -1,0 +1,13 @@
+{
+  "input_file": "sample_data/demo_retail_dataset.csv",
+  "cleaning_output_file": "cleaning_report_output.xlsx",
+  "predictive_output_file": "predictive_analytics_output.xlsx",
+  "columns": {
+    "date": "Date",
+    "sales": "Total_Sales",
+    "category": "Category",
+    "customer": "Customer_ID",
+    "units": "Units_Sold",
+    "unit_price": "Unit_Price"
+  }
+}

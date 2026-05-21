@@ -3,10 +3,14 @@ import numpy as np
 from openpyxl.utils import get_column_letter
 from pathlib import Path
 import re
+from validation import load_config
 
-INPUT_FILE = "demo_retail_dataset.csv"
-OUTPUT_FILE = "cleaning_report_output.xlsx"
+CONFIG = load_config()
+
+INPUT_FILE = CONFIG["input_file"]
+OUTPUT_FILE = CONFIG["cleaning_output_file"]
 SHEET_NAME = None
+COLUMN_CONFIG = CONFIG["columns"]
 
 
 def cell_ref(row_idx, col_idx):
@@ -31,7 +35,53 @@ def infer_column_type(series):
         return "numeric"
     if date_parse >= 0.80:
         return "date"
+
     return "text"
+
+
+def get_configured_type(column_name):
+    numeric_fields = [
+        "sales",
+        "units",
+        "unit_price"
+    ]
+
+    date_fields = [
+        "date"
+    ]
+
+    text_fields = [
+        "category",
+        "customer"
+    ]
+
+    for field in numeric_fields:
+        if COLUMN_CONFIG.get(field) == column_name:
+            return "numeric"
+
+    for field in date_fields:
+        if COLUMN_CONFIG.get(field) == column_name:
+            return "date"
+
+    for field in text_fields:
+        if COLUMN_CONFIG.get(field) == column_name:
+            return "text"
+
+    return None
+
+
+def infer_expected_types(df):
+    expected_types = {}
+
+    for col in df.columns:
+        configured_type = get_configured_type(col)
+
+        if configured_type:
+            expected_types[col] = configured_type
+        else:
+            expected_types[col] = infer_column_type(df[col])
+
+    return expected_types
 
 
 def is_identifier_column(col, series):
@@ -146,6 +196,24 @@ def create_missingness_report(original_df, cleaned_df):
     return pd.DataFrame(rows)
 
 
+def validate_config_columns(df):
+    missing_columns = []
+
+    for logical_name, actual_column in COLUMN_CONFIG.items():
+        if actual_column not in df.columns:
+            missing_columns.append({
+                "configured_field": logical_name,
+                "expected_column_name": actual_column
+            })
+
+    if missing_columns:
+        missing_df = pd.DataFrame(missing_columns)
+        raise ValueError(
+            "The following configured columns were not found in the dataset:\n"
+            + missing_df.to_string(index=False)
+        )
+
+
 def clean_and_report(input_file, output_file, sheet_name=None):
     input_path = Path(input_file)
 
@@ -157,6 +225,8 @@ def clean_and_report(input_file, output_file, sheet_name=None):
         source_sheet = "csv_input"
     else:
         raise ValueError("Input must be .xlsx, .xls, or .csv")
+
+    validate_config_columns(raw_df)
 
     original_df = raw_df.copy()
     clean_df = raw_df.copy()
@@ -194,10 +264,7 @@ def clean_and_report(input_file, output_file, sheet_name=None):
         })
         rows_to_remove.add(r)
 
-    expected_types = {
-        col: infer_column_type(clean_df[col])
-        for col in clean_df.columns
-    }
+    expected_types = infer_expected_types(clean_df)
 
     identifier_columns = {
         col for col in clean_df.columns
@@ -229,7 +296,7 @@ def clean_and_report(input_file, output_file, sheet_name=None):
                         "error_type": "Text found where numeric expected",
                         "original_value": value,
                         "action_taken": "Row removed from cleaned dataset",
-                        "reason": "Could not safely convert value to numeric"
+                        "reason": "Configured or inferred numeric field could not be converted safely"
                     })
                     rows_to_remove.add(row_idx)
                 else:
@@ -247,7 +314,7 @@ def clean_and_report(input_file, output_file, sheet_name=None):
                         "error_type": "Invalid date value",
                         "original_value": value,
                         "action_taken": "Row removed from cleaned dataset",
-                        "reason": "Could not safely convert value to date"
+                        "reason": "Configured or inferred date field could not be converted safely"
                     })
                     rows_to_remove.add(row_idx)
                 else:
@@ -269,7 +336,7 @@ def clean_and_report(input_file, output_file, sheet_name=None):
                         "error_type": "Numeric found where text expected",
                         "original_value": value,
                         "action_taken": "Row removed from cleaned dataset",
-                        "reason": "Column appears to contain categorical/text values"
+                        "reason": "Configured or inferred text field contains numeric-only value"
                     })
                     rows_to_remove.add(row_idx)
                 else:

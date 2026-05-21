@@ -4,18 +4,14 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Alignment
 from openpyxl.chart import BarChart, Reference
+from validation import load_config
 
-INPUT_FILE = "cleaning_report_output.xlsx"
-OUTPUT_FILE = "predictive_analytics_output.xlsx"
+CONFIG = load_config()
+
+INPUT_FILE = CONFIG["cleaning_output_file"]
+OUTPUT_FILE = CONFIG["predictive_output_file"]
 SHEET_NAME = "Cleaned_Data"
-
-
-def find_column(df, keywords):
-    for col in df.columns:
-        col_clean = str(col).lower().replace(" ", "_")
-        if any(k in col_clean for k in keywords):
-            return col
-    return None
+COLUMN_CONFIG = CONFIG["columns"]
 
 
 def normalize_score(series):
@@ -37,6 +33,44 @@ def risk_level(score):
     return "Low"
 
 
+def validate_required_columns(df):
+    required_fields = ["sales", "category"]
+
+    missing = []
+
+    for field in required_fields:
+        configured_column = COLUMN_CONFIG.get(field)
+
+        if configured_column is None:
+            missing.append({
+                "configured_field": field,
+                "problem": "Missing from config.json"
+            })
+        elif configured_column not in df.columns:
+            missing.append({
+                "configured_field": field,
+                "problem": f"Column '{configured_column}' not found in cleaned dataset"
+            })
+
+    optional_fields = ["date", "customer"]
+
+    for field in optional_fields:
+        configured_column = COLUMN_CONFIG.get(field)
+
+        if configured_column and configured_column not in df.columns:
+            missing.append({
+                "configured_field": field,
+                "problem": f"Optional column '{configured_column}' not found in cleaned dataset"
+            })
+
+    if missing:
+        missing_df = pd.DataFrame(missing)
+        raise ValueError(
+            "Column configuration issue found:\n"
+            + missing_df.to_string(index=False)
+        )
+
+
 def calculate_outlier_burden(df, category_col, sales_col):
     values = pd.to_numeric(df[sales_col], errors="coerce").dropna()
 
@@ -51,6 +85,7 @@ def calculate_outlier_burden(df, category_col, sales_col):
     upper_bound = q3 + 1.5 * iqr
 
     df = df.copy()
+
     df["is_outlier"] = (
         (pd.to_numeric(df[sales_col], errors="coerce") < lower_bound) |
         (pd.to_numeric(df[sales_col], errors="coerce") > upper_bound)
@@ -125,20 +160,16 @@ def apply_formatting_and_charts(output_file):
 
 def run_predictive_analysis():
     if not Path(INPUT_FILE).exists():
-        raise FileNotFoundError(f"{INPUT_FILE} not found.")
+        raise FileNotFoundError(f"{INPUT_FILE} not found. Run clean_retail_data.py first.")
 
     df = pd.read_excel(INPUT_FILE, sheet_name=SHEET_NAME)
 
-    sales_col = find_column(df, ["sales", "amount", "revenue", "price", "total"])
-    category_col = find_column(df, ["category", "product", "region", "segment"])
-    date_col = find_column(df, ["date", "time"])
-    customer_col = find_column(df, ["customer", "client", "account"])
+    validate_required_columns(df)
 
-    if sales_col is None:
-        raise ValueError("Could not identify a sales/revenue column.")
-
-    if category_col is None:
-        raise ValueError("Could not identify a category/product/region column.")
+    sales_col = COLUMN_CONFIG["sales"]
+    category_col = COLUMN_CONFIG["category"]
+    date_col = COLUMN_CONFIG.get("date")
+    customer_col = COLUMN_CONFIG.get("customer")
 
     df[sales_col] = pd.to_numeric(df[sales_col], errors="coerce")
     df = df.dropna(subset=[sales_col, category_col])
@@ -193,7 +224,6 @@ def run_predictive_analysis():
 
         most_recent_date = df[date_col].max()
         df["days_old"] = (most_recent_date - df[date_col]).dt.days
-
         df["recency_weight"] = np.exp(-df["days_old"] / 60)
 
         recency_weighted_sales = (
@@ -267,13 +297,13 @@ def run_predictive_analysis():
         )
 
         grouped = grouped.rename(columns={customer_col: "top_customer"})
+
     else:
         grouped["top_customer"] = "Not available"
         grouped["top_customer_sales"] = np.nan
         grouped["customer_concentration"] = 0
 
     outlier_burden = calculate_outlier_burden(df, category_col, sales_col)
-
     grouped = grouped.merge(outlier_burden, on=category_col, how="left")
 
     grouped["outlier_count"] = grouped["outlier_count"].fillna(0)
@@ -292,12 +322,16 @@ def run_predictive_analysis():
     )
 
     grouped["business_trend_risk"] = grouped["decline_score"]
+
     grouped["operational_risk"] = (
         0.60 * grouped["volatility_score"] +
         0.40 * grouped["low_volume_score"]
     )
+
     grouped["customer_risk"] = grouped["customer_concentration_score"]
+
     grouped["performance_risk"] = grouped["low_sales_score"]
+
     grouped["data_reliability_risk"] = (
         0.65 * grouped["outlier_burden_score"] +
         0.35 * grouped["data_quality_risk_score"]
@@ -312,7 +346,6 @@ def run_predictive_analysis():
     ).round(1)
 
     grouped["risk_level"] = grouped["composite_risk_score"].apply(risk_level)
-
     grouped = grouped.sort_values("composite_risk_score", ascending=False)
 
     model_insights = grouped[
@@ -393,6 +426,7 @@ def run_predictive_analysis():
             "Business objective",
             "Unit of analysis",
             "Outcome being estimated",
+            "Configured columns used",
             "Features engineered",
             "Updated composite score formula",
             "Customer concentration",
@@ -408,8 +442,9 @@ def run_predictive_analysis():
         "details": [
             "Transparent composite risk scoring model using engineered sales-performance, customer, and data reliability features.",
             "Identify segments that may be at risk of future underperformance or require business review.",
-            f"Each row in the model output represents one value of the '{category_col}' column.",
+            f"Each row in the model output represents one value of the configured category column: '{category_col}'.",
             "The model estimates relative business risk, not a guaranteed future outcome.",
+            f"Sales column: {sales_col}; Category column: {category_col}; Date column: {date_col}; Customer column: {customer_col}.",
             "Total sales, average sale, transaction count, sales volatility, sales share, sales momentum, recency-weighted sales, customer concentration, outlier burden, and normalized risk component scores.",
             "Composite Risk Score = 25% business trend risk + 20% operational risk + 15% customer risk + 20% performance risk + 20% data reliability risk.",
             "Customer concentration measures the share of segment sales driven by the largest customer. Higher concentration may indicate dependency risk.",
