@@ -1,94 +1,137 @@
 # Retail Data Quality & Predictive Analytics Dashboard
 
-End-to-end analytics workflow built in Python for cleaning retail data, documenting data quality issues, generating predictive insights, and presenting results through an interactive Streamlit dashboard.
+End-to-end Python analytics project that cleans messy retail sales data, validates input quality, generates explainable risk scores, and presents business-ready insights in an interactive Streamlit dashboard.
 
-This project demonstrates how raw business data can be transformed into clean, decision-ready output while preserving transparency, explainability, and production-style validation.
+This project is built to demonstrate practical analytics work: not just building a dashboard, but creating the full workflow required to move from unreliable source data to clean, explainable, decision-ready output.
 
 ---
 
-# Dashboard Preview
+## Business Case
 
-## Main Dashboard
+Retail leaders often receive store or segment-level sales data from spreadsheets, exports, or operational systems. Before that data can support decisions, an analyst needs to answer several questions:
+
+1. Can the data be trusted?
+2. What changed during cleaning?
+3. Which segments show the highest relative risk?
+4. What factors are driving the risk score?
+5. How can the results be reviewed quickly by a business stakeholder?
+
+This project simulates that workflow using a reproducible Python pipeline.
+
+The result is a portfolio-ready analytics application that combines data cleaning, validation, feature engineering, explainable risk scoring, Excel-style reporting, automated tests, and an interactive dashboard.
+
+---
+
+## Dashboard Preview
+
+### Main Dashboard
 
 ![Dashboard Overview](screenshots/dashboard_overview.png)
 
-## Segment Risk Drilldown
+### Segment Risk Drilldown
 
 ![Segment Analysis](screenshots/segment_analysis.png)
 
-## Data Quality Review
+### Data Quality Review
 
 ![Data Quality](screenshots/data_quality.png)
 
 ---
 
-# Project Workflow
+## What This Project Demonstrates
 
-Raw Dataset (.csv / .xlsx)
-
-↓
-
-Configuration Layer (`config.json`)
-
-↓
-
-Validation Engine
-
-↓
-
-Data Cleaning Engine
-
-↓
-
-Quality Reports
-
-↓
-
-Predictive Analytics
-
-↓
-
-Interactive Dashboard
-
-↓
-
-Business Recommendations
+- Cleaning and validating messy business data
+- Building a configurable analytics pipeline with `config.json`
+- Preserving transparency through validation checks and issue reporting
+- Creating an explainable composite risk score
+- Translating technical outputs into business-friendly dashboard views
+- Using automated tests to protect core validation and cleaning logic
+- Designing outputs for both analysts and non-technical stakeholders
 
 ---
 
-# Features
+## Project Workflow
 
-## Configurable Inputs
+Raw retail dataset
 
-The project uses:
+↓  
 
-```text
-config.json
-```
+Configuration layer: `config.json`
 
-Users can define:
+↓  
+
+Validation engine: `validation.py`
+
+↓  
+
+Data cleaning: `clean_retail_data.py`
+
+↓  
+
+Predictive analytics: `predictive_analytics.py`
+
+↓  
+
+Interactive dashboard: `dashboard.py`
+
+↓  
+
+Business review and decision support
+
+---
+
+## Repository Structure
+
+    retail-data-quality-risk-dashboard/
+
+    clean_retail_data.py
+    predictive_analytics.py
+    dashboard.py
+    validation.py
+    config.json
+    requirements.txt
+    README.md
+
+    sample_data/
+    └── demo_retail_dataset.csv
+
+    screenshots/
+    ├── dashboard_overview.png
+    ├── segment_analysis.png
+    └── data_quality.png
+
+    tests/
+    ├── test_validation.py
+    ├── test_cleaning.py
+    └── performance_test.py
+
+---
+
+## Key Components
+
+### 1. Configurable Inputs
+
+The project uses `config.json` so the workflow can be adjusted without rewriting the core scripts.
+
+The configuration layer supports:
 
 - Input file location
-- Output files
-- Date column
-- Sales column
-- Category column
-- Customer column
-- Unit columns
+- Output file names
+- Date column mapping
+- Sales column mapping
+- Category column mapping
+- Customer column mapping
+- Unit column mapping
 
-No code changes required when column names differ.
+This makes the project more realistic than a one-off notebook because column names and file paths can be changed through configuration.
 
 ---
 
-## Validation Layer
+### 2. Validation Layer
 
-Centralized validation through:
+The validation layer is centralized in `validation.py`.
 
-```text
-validation.py
-```
-
-Checks include:
+It checks for common setup and input problems before the workflow runs, including:
 
 - Missing config fields
 - Missing required mappings
@@ -97,37 +140,47 @@ Checks include:
 - Unsupported file types
 - Missing datasets
 
+This helps prevent silent failures and makes the workflow easier to troubleshoot.
+
 ---
 
-## Data Cleaning
+### 3. Data Cleaning
 
-Cleaning engine performs:
+The cleaning workflow is handled in `clean_retail_data.py`.
+
+It performs:
 
 - Original dataset preservation
-- Clean dataset generation
+- Cleaned dataset generation
 - Duplicate detection
 - Invalid numeric removal
 - Date validation
 - Missingness reporting
 - Numeric summaries
-- Human-readable distributions
-- Exact issue logging
+- Text distributions
+- Issue logging
 - Cell-level tracking
 
-Generated outputs:
+Generated report sections include:
 
-- Original_Data
-- Cleaned_Data
-- Change_Log
-- Missingness
-- Numeric_Summary
-- Text_Distributions
+- `Original_Data`
+- `Cleaned_Data`
+- `Change_Log`
+- `Missingness`
+- `Numeric_Summary`
+- `Text_Distributions`
+
+The goal is not only to clean the data, but to make the cleaning process reviewable by another analyst or stakeholder.
 
 ---
 
-## Predictive Analytics
+### 4. Predictive Analytics
 
-Transparent business risk model evaluates:
+The predictive analytics workflow is handled in `predictive_analytics.py`.
+
+It creates a transparent composite risk score based on business and data reliability signals.
+
+The model evaluates:
 
 - Sales momentum
 - Recency-weighted performance
@@ -148,74 +201,51 @@ Outputs include:
 
 ---
 
-# Composite Risk Score (v2)
+## Composite Risk Score
 
-Business Trend Risk (25%)
+The project uses an explainable weighted scoring approach.
 
-- Sales momentum
-- Recency weighting
+| Risk Area | Weight | Example Drivers |
+|---|---:|---|
+| Business Trend Risk | 25% | Sales momentum, recency weighting |
+| Operational Risk | 20% | Sales volatility, transaction volume |
+| Customer Risk | 15% | Customer concentration |
+| Performance Risk | 20% | Relative sales strength |
+| Data Reliability Risk | 20% | Outlier burden, data support quality |
 
-Operational Risk (20%)
+The score is designed as a relative ranking metric.
 
-- Sales volatility
-- Transaction volume
-
-Customer Risk (15%)
-
-- Customer concentration
-
-Performance Risk (20%)
-
-- Relative sales strength
-
-Data Reliability Risk (20%)
-
-- Outlier burden
-- Data support quality
+A higher score means a segment should receive more review attention compared with other segments in the dataset.
 
 ---
 
-# Risk Interpretation
+## Risk Interpretation
 
 Score range:
 
-```text
-0 → Lowest relative concern
-100 → Highest relative concern
-```
-
-The score is:
-
-✅ Relative ranking metric
-
-The score is NOT:
-
-❌ Probability
-
-Example:
-
-```text
-Risk Score = 60
-```
-
-Does NOT mean:
-
-```text
-60% chance of decline
-```
+    0 = Lowest relative concern
+    100 = Highest relative concern
 
 Risk bands:
 
-- Low = 0–24.9
-- Moderate = 25–49.9
-- High = 50–74.9
-- Critical = 75–100
+| Score Range | Risk Band |
+|---:|---|
+| 0 to 24.9 | Low |
+| 25 to 49.9 | Moderate |
+| 50 to 74.9 | High |
+| 75 to 100 | Critical |
+
+Important interpretation note:
+
+A risk score of 60 does not mean there is a 60% probability of decline. It means the segment ranks higher in relative concern based on the project’s weighted business and data quality signals.
 
 ---
 
-# Dashboard
+## Dashboard
 
-Interactive dashboard includes:
+The Streamlit dashboard gives users a business-friendly way to review results.
+
+Dashboard sections include:
 
 ### Executive KPIs
 
@@ -239,18 +269,18 @@ Interactive dashboard includes:
 
 ### Reporting
 
-- Download cleaning report
-- Download predictive output
+- Cleaning report download
+- Predictive output download
 
-Launch:
+Launch the dashboard with:
 
-```bash
-streamlit run dashboard.py
-```
+    streamlit run dashboard.py
 
 ---
 
-# Automated Testing
+## Automated Testing
+
+The project includes automated tests for validation and cleaning logic.
 
 Current test coverage includes:
 
@@ -265,142 +295,105 @@ Current test coverage includes:
 - Duplicate removal
 - Invalid numeric detection
 
-Run tests:
+Run tests with:
 
-```bash
-PYTHONPATH=. python3 -m pytest tests/
-```
+    PYTHONPATH=. python3 -m pytest tests/
 
 ---
 
-# Performance Benchmark
+## Performance Benchmark
 
 Cleaning pipeline benchmark results:
 
 | Rows | Runtime |
-|------|---------|
+|---:|---:|
 | 10,000 | 4.1 sec |
 | 50,000 | 20.5 sec |
 | 100,000 | 42.8 sec |
 
-Benchmarks executed locally on macOS.
+Benchmarks were executed locally on macOS.
 
-Current implementation handles 100k rows in under one minute.
-
----
-
-# Project Structure
-
-```text
-retail-data-quality-risk-dashboard/
-
-clean_retail_data.py
-predictive_analytics.py
-dashboard.py
-validation.py
-config.json
-requirements.txt
-README.md
-
-sample_data/
-└── demo_retail_dataset.csv
-
-screenshots/
-├── dashboard_overview.png
-├── segment_analysis.png
-└── data_quality.png
-
-tests/
-├── test_validation.py
-├── test_cleaning.py
-└── performance_test.py
-```
+The current implementation handles 100,000 rows in under one minute.
 
 ---
 
-# How To Run
+## How To Run
 
-Install:
+Install dependencies:
 
-```bash
-pip install -r requirements.txt
-```
+    pip install -r requirements.txt
 
-Run cleaning:
+Run the cleaning workflow:
 
-```bash
-python3 clean_retail_data.py
-```
+    python3 clean_retail_data.py
 
-Run predictive model:
+Run the predictive analytics workflow:
 
-```bash
-python3 predictive_analytics.py
-```
+    python3 predictive_analytics.py
 
-Launch dashboard:
+Launch the dashboard:
 
-```bash
-streamlit run dashboard.py
-```
+    streamlit run dashboard.py
 
 Run tests:
 
-```bash
-PYTHONPATH=. python3 -m pytest tests/
-```
+    PYTHONPATH=. python3 -m pytest tests/
 
 ---
 
-# Skills Demonstrated
+## Skills Demonstrated
 
-Analytics:
+### Analytics
 
 - Data cleaning
 - Missingness analysis
 - Feature engineering
 - Predictive analytics
-- Explainable models
-- Risk scoring
+- Explainable risk scoring
+- Data quality review
+- Executive reporting
 
-Technical:
+### Technical
 
 - Python
-- Pandas
+- pandas
 - OpenPyXL
 - Streamlit
 - Plotly
-- Pytest
+- pytest
+- Configuration-driven workflows
 - Validation pipelines
 
-Business:
+### Business
 
-- Executive reporting
 - Decision support
-- Model transparency
 - Risk interpretation
-- Business communication
+- Stakeholder communication
+- Data quality transparency
+- Translating raw data into actionable review outputs
 
 ---
 
-# Future Enhancements
+## Why This Project Matters
 
-Planned:
+Many analytics projects fail because the final dashboard is built on data that has not been properly cleaned, validated, or explained.
 
-- Seasonality adjustment
-- Rolling-window analysis
-- Peer-relative scoring
-- Basket behavior metrics
-- Customer retention metrics
-- Scenario simulation
-- PDF export
-- Multi-file uploads
-- Larger dataset optimization
+This project focuses on the full analytics lifecycle:
+
+- Validate the inputs
+- Clean the data
+- Document the issues
+- Engineer business-relevant signals
+- Score risk transparently
+- Present results in a dashboard
+- Support stakeholder review
+
+That workflow is closer to real business analytics work than a standalone visualization or notebook. It shows the ability to build practical, explainable, reviewable analytics tools that can support decision-making.
 
 ---
 
-# Disclaimer
+## Disclaimer
 
 Created for portfolio and demonstration purposes.
 
-Risk scores are intended for decision support and should not be interpreted as probabilities or guaranteed outcomes.
+The demo dataset is synthetic. Risk scores are intended for decision support and relative prioritization, not as guaranteed predictions or probabilities.
