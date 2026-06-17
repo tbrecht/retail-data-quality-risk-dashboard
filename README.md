@@ -1,8 +1,10 @@
 # Retail Data Quality & Predictive Analytics Dashboard
 
+![Run Python Tests](https://github.com/tbrecht/retail-data-quality-risk-dashboard/actions/workflows/tests.yml/badge.svg)
+
 End-to-end Python analytics project that cleans messy retail sales data, validates input quality, generates explainable risk scores, and presents business-ready insights in an interactive Streamlit dashboard.
 
-This project is built to demonstrate practical analytics work: not just building a dashboard, but creating the full workflow required to move from unreliable source data to clean, explainable, decision-ready output.
+This project demonstrates the full analytics workflow required to move from unreliable source data to clean, explainable, decision-ready output.
 
 ---
 
@@ -52,31 +54,25 @@ The result is a portfolio-ready analytics application that combines data cleanin
 
 ## Project Workflow
 
-Raw retail dataset
-
-↓  
-
-Configuration layer: `config.json`
-
-↓  
-
-Validation engine: `validation.py`
-
-↓  
-
-Data cleaning: `clean_retail_data.py`
-
-↓  
-
-Predictive analytics: `predictive_analytics.py`
-
-↓  
-
-Interactive dashboard: `dashboard.py`
-
-↓  
-
-Business review and decision support
+    Raw retail dataset
+        |
+        v
+    Configuration layer: config.json
+        |
+        v
+    Validation engine: validation.py
+        |
+        v
+    Data cleaning: clean_retail_data.py
+        |
+        v
+    Predictive analytics: predictive_analytics.py
+        |
+        v
+    Interactive dashboard: dashboard.py
+        |
+        v
+    Business review and decision support
 
 ---
 
@@ -93,17 +89,17 @@ Business review and decision support
     README.md
 
     sample_data/
-    └── demo_retail_dataset.csv
+    - demo_retail_dataset.csv
 
     screenshots/
-    ├── dashboard_overview.png
-    ├── segment_analysis.png
-    └── data_quality.png
+    - dashboard_overview.png
+    - segment_analysis.png
+    - data_quality.png
 
     tests/
-    ├── test_validation.py
-    ├── test_cleaning.py
-    └── performance_test.py
+    - test_validation.py
+    - test_cleaning.py
+    - performance_test.py
 
 ---
 
@@ -213,9 +209,7 @@ The project uses an explainable weighted scoring approach.
 | Performance Risk | 20% | Relative sales strength |
 | Data Reliability Risk | 20% | Outlier burden, data support quality |
 
-The score is designed as a relative ranking metric.
-
-A higher score means a segment should receive more review attention compared with other segments in the dataset.
+The score is designed as a relative ranking metric. A higher score means a segment should receive more review attention compared with other segments in the dataset.
 
 ---
 
@@ -234,8 +228,6 @@ Risk bands:
 | 25 to 49.9 | Moderate |
 | 50 to 74.9 | High |
 | 75 to 100 | Critical |
-
-Important interpretation note:
 
 A risk score of 60 does not mean there is a 60% probability of decline. It means the segment ranks higher in relative concern based on the project’s weighted business and data quality signals.
 
@@ -363,6 +355,7 @@ Run tests:
 - pytest
 - Configuration-driven workflows
 - Validation pipelines
+- GitHub Actions
 
 ### Business
 
