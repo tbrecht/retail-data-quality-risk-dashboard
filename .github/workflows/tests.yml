@@ -1,5 +1,8 @@
 name: Run Python Tests
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: [main]
