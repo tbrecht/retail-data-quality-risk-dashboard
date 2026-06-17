@@ -40,6 +40,18 @@ The result is a portfolio-ready analytics application that combines data cleanin
 
 ---
 
+## Sample Outputs
+
+The repository includes curated sample outputs so reviewers can inspect the results without running the project locally.
+
+| Output | Description |
+|---|---|
+| `sample_outputs/cleaned_output.csv` | Cleaned retail dataset produced by the cleaning workflow |
+| `sample_outputs/cleaning_report_output.xlsx` | Excel validation report with original data, cleaned data, issue log, missingness summary, numeric summary, and text distributions |
+| `sample_outputs/predictive_analytics_output.xlsx` | Predictive analytics workbook with executive summary, model insights, risk score explanation, and full model output |
+
+---
+
 ## What This Project Demonstrates
 
 - Cleaning and validating messy business data
@@ -90,6 +102,11 @@ The result is a portfolio-ready analytics application that combines data cleanin
 
     sample_data/
     - demo_retail_dataset.csv
+
+    sample_outputs/
+    - cleaned_output.csv
+    - cleaning_report_output.xlsx
+    - predictive_analytics_output.xlsx
 
     screenshots/
     - dashboard_overview.png
