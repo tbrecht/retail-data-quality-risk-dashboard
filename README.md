@@ -59,7 +59,7 @@ The repository includes curated sample outputs so reviewers can inspect the resu
 - Preserving transparency through validation checks and issue reporting
 - Creating an explainable composite risk score
 - Translating technical outputs into business-friendly dashboard views
-- Using automated tests to protect core validation and cleaning logic
+- Using automated tests and GitHub Actions to verify core logic
 - Designing outputs for both analysts and non-technical stakeholders
 
 ---
@@ -91,6 +91,10 @@ The repository includes curated sample outputs so reviewers can inspect the resu
 ## Repository Structure
 
     retail-data-quality-risk-dashboard/
+
+    .github/
+    - workflows/
+      - tests.yml
 
     clean_retail_data.py
     predictive_analytics.py
@@ -289,7 +293,7 @@ Launch the dashboard with:
 
 ## Automated Testing
 
-The project includes automated tests for validation and cleaning logic.
+The project includes automated tests for validation and cleaning logic. Tests run locally with `pytest` and automatically through GitHub Actions on pushes and pull requests to `main`.
 
 Current test coverage includes:
 
@@ -304,7 +308,7 @@ Current test coverage includes:
 - Duplicate removal
 - Invalid numeric detection
 
-Run tests with:
+Run tests locally with:
 
     PYTHONPATH=. python3 -m pytest tests/
 
@@ -370,9 +374,9 @@ Run tests:
 - Streamlit
 - Plotly
 - pytest
+- GitHub Actions
 - Configuration-driven workflows
 - Validation pipelines
-- GitHub Actions
 
 ### Business
 
