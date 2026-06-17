@@ -5,3 +5,8 @@ __pycache__/
 .DS_Store
 *.csv
 *.xlsx
+
+# Allow curated portfolio sample outputs
+!sample_outputs/
+!sample_outputs/*.csv
+!sample_outputs/*.xlsx
